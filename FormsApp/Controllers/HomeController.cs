@@ -32,8 +32,8 @@ namespace FormsApp.Controllers
             var model = new ProductViewModel
             {
                 Products = products,
-                Categories=Repository.Categories,
-                SelectedCategory=category
+                Categories = Repository.Categories,
+                SelectedCategory = category
             };
             return View(model);
         }
@@ -41,14 +41,21 @@ namespace FormsApp.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.Categories=Repository.Categories;
+            ViewBag.Categories = new SelectList(Repository.Categories, "CategoryId", "CategoryName");
             return View();
         }
 
         [HttpPost]
         public IActionResult Create(Product product)
         {
-            return View();
+            if (ModelState.IsValid)
+            {
+                product.ProductId = Repository.Products.Count + 1;
+                Repository.CreateProduct(product);
+                return RedirectToAction("Index");
+            }
+            ViewBag.Categories = new SelectList(Repository.Categories, "CategoryId", "CategoryName");
+            return View(product);
         }
     }
 }
