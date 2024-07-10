@@ -46,16 +46,57 @@ namespace FormsApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Product product)
+        public async Task<IActionResult> Create(Product product, IFormFile imageFile)
         {
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+            var randomFileName = string.Empty;
+
+            if (imageFile != null)
+            {
+                var extension = Path.GetExtension(imageFile.FileName);
+                if (!allowedExtensions.Contains(extension))
+                {
+                    ModelState.AddModelError("", "Geçerli bir resim seçiniz.");
+                }
+                else
+                {
+                    randomFileName = $"{Guid.NewGuid()}{extension}";
+                    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/img", randomFileName);
+
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await imageFile.CopyToAsync(stream);
+                    }
+                }
+            }
+
             if (ModelState.IsValid)
             {
+                product.Image = randomFileName;
                 product.ProductId = Repository.Products.Count + 1;
                 Repository.CreateProduct(product);
                 return RedirectToAction("Index");
             }
+
             ViewBag.Categories = new SelectList(Repository.Categories, "CategoryId", "CategoryName");
             return View(product);
+        }
+
+        public IActionResult Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var entity=Repository.Products.FirstOrDefault(p=>p.ProductId == id);
+            if (entity == null)
+            {
+                return NotFound();
+            }
+            ViewBag.Categories = new SelectList(Repository.Categories, "CategoryId", "CategoryName");
+
+            return View(entity);
         }
     }
 }
