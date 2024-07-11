@@ -35,7 +35,7 @@
                 CategoryId = 1,
                 Name = "Iphone 15",
                 Price = 50000,
-                IsActive = true,
+                IsActive = false,
                 Image = "2.jpg"
             });
             _products.Add(new Product
@@ -53,7 +53,7 @@
                 CategoryId = 1,
                 Name = "Iphone 17",
                 Price = 70000,
-                IsActive = true,
+                IsActive = false,
                 Image = "4.jpg"
             });
 
@@ -97,11 +97,35 @@
 
             if (entity != null)
             {
-                entity.Name = updatedProduct.Name;
+                if (string.IsNullOrEmpty(updatedProduct.Name))
+                {
+                    entity.Name = updatedProduct.Name;
+
+                }
                 entity.Price = updatedProduct.Price;
                 entity.Image = updatedProduct.Image;
                 entity.CategoryId = updatedProduct.CategoryId;
                 entity.IsActive = updatedProduct.IsActive;
+            }
+        }
+
+        public static void EditIsActive(Product updatedProduct)
+        {
+            var entity = _products.FirstOrDefault(p => p.ProductId == updatedProduct.ProductId);
+
+            if (entity != null)
+            {
+                entity.IsActive = updatedProduct.IsActive;
+            }
+        }
+
+        public static void DeleteProduct(Product deletedProduct)
+        {
+            var entity = _products.FirstOrDefault(p => p.ProductId == deletedProduct.ProductId);
+
+            if(entity != null)
+            {
+                _products.Remove(entity);
             }
         }
 
